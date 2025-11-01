@@ -1,0 +1,263 @@
+// utils/quotaSystem.js - UPDATED with new reduced quota requirements
+const RankSystem = require('./rankSystem');
+
+class QuotaSystem {
+    // UPDATED: New rank-based quota structure with reduced requirements
+    static quotaByRankLevel = {
+        // Probationary (unchanged)
+        1: 10,   // Probationary Operator: 10 points
+        
+        // Junior-Senior ranks (reduced from 20 to 12)
+        2: 12,   // Junior Operator: 12 points (was 20)
+        3: 12,   // Experienced Operator: 12 points (was 20)
+        4: 12,   // Senior Operator: 12 points (was 20)
+        
+        // Specialized-Elite ranks (reduced from 25 to 15)
+        5: 15,   // Specialized Operator: 15 points (was 25)
+        6: 15,   // Elite Operator: 15 points (was 25)
+        
+        // Elite I-IV ranks (reduced from 30 to 18)
+        7: 18,   // Elite Operator I Class: 18 points (was 30)
+        8: 18,   // Elite Operator II Class: 18 points (was 30)
+        9: 18,   // Elite Operator III Class: 18 points (was 30)
+        10: 18,  // Elite Operator IV Class: 18 points (was 30)
+        
+        // Executive+ ranks (no quota - unchanged)
+        11: 0,   // Commanding Officer: No quota
+        12: 0,   // Senior Commanding Officer: No quota
+        13: 0,   // Operations Chief: No quota
+        14: 0,   // Deputy Commander: No quota
+        15: 0    // MRB Commander: No quota
+    };
+
+    // Get quota for a specific rank level
+    static getQuotaForRank(rankLevel) {
+        return this.quotaByRankLevel[rankLevel] || 10; // Default to 10 if rank not found
+    }
+
+    // Get quota for a user based on their current rank
+    static getUserQuota(user) {
+        const rankLevel = user.rankLevel || 1;
+        return this.getQuotaForRank(rankLevel);
+    }
+
+    // Check if user has completed their quota
+    static isQuotaCompleted(user) {
+        const userQuota = this.getUserQuota(user);
+        
+        // Executive+ ranks have no quota requirement
+        if (userQuota === 0) return true;
+        
+        return user.biweeklyPoints >= userQuota;
+    }
+
+    // Update user's quota based on their current rank
+    static updateUserQuota(user) {
+        const newQuota = this.getUserQuota(user);
+        const oldQuota = user.biweeklyQuota;
+        
+        user.biweeklyQuota = newQuota;
+        user.quotaCompleted = this.isQuotaCompleted(user);
+        
+        return {
+            updated: oldQuota !== newQuota,
+            oldQuota,
+            newQuota,
+            completed: user.quotaCompleted
+        };
+    }
+
+    // Bulk update all users' quotas (for system-wide quota fixes)
+    static async updateAllUserQuotas() {
+        try {
+            const MRBUser = require('../models/MRBUser');
+            
+            console.log('🔧 Starting bulk quota update with NEW quota requirements...');
+            
+            const users = await MRBUser.find({});
+            let updatedCount = 0;
+            let completionChanges = 0;
+            const updateResults = [];
+            
+            for (const user of users) {
+                const result = this.updateUserQuota(user);
+                
+                if (result.updated) {
+                    updatedCount++;
+                    updateResults.push({
+                        username: user.username,
+                        rankLevel: user.rankLevel,
+                        oldQuota: result.oldQuota,
+                        newQuota: result.newQuota,
+                        wasCompleted: user.biweeklyPoints >= result.oldQuota,
+                        nowCompleted: result.completed
+                    });
+                    
+                    // Check if completion status changed
+                    const wasCompleted = user.biweeklyPoints >= result.oldQuota;
+                    if (wasCompleted !== result.completed) {
+                        completionChanges++;
+                    }
+                }
+                
+                await user.save();
+            }
+            
+            console.log(`✅ Bulk quota update complete with NEW requirements:`);
+            console.log(`   - Total users: ${users.length}`);
+            console.log(`   - Quotas updated: ${updatedCount}`);
+            console.log(`   - Completion status changes: ${completionChanges}`);
+            
+            if (updateResults.length > 0) {
+                console.log('📊 NEW Quota changes:');
+                updateResults.forEach(result => {
+                    console.log(`   - ${result.username}: ${result.oldQuota} → ${result.newQuota} points`);
+                });
+            }
+            
+            return {
+                success: true,
+                totalUsers: users.length,
+                updated: updatedCount,
+                completionChanges,
+                updateResults
+            };
+            
+        } catch (error) {
+            console.error('❌ Bulk quota update error:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+
+    // Get quota statistics for all ranks
+    static getQuotaStatistics() {
+        const stats = {
+            byRank: {},
+            totalRanks: 15,
+            ranksWithQuota: 0,
+            ranksWithoutQuota: 0,
+            averageQuota: 0
+        };
+
+        let totalQuota = 0;
+        let ranksWithQuota = 0;
+
+        for (let level = 1; level <= 15; level++) {
+            const rank = RankSystem.getRankByLevel(level);
+            const quota = this.getQuotaForRank(level);
+            
+            stats.byRank[rank.name] = {
+                level,
+                quota,
+                hasQuota: quota > 0
+            };
+            
+            if (quota > 0) {
+                totalQuota += quota;
+                ranksWithQuota++;
+                stats.ranksWithQuota++;
+            } else {
+                stats.ranksWithoutQuota++;
+            }
+        }
+
+        stats.averageQuota = ranksWithQuota > 0 ? Math.round(totalQuota / ranksWithQuota) : 0;
+
+        return stats;
+    }
+
+    // Get human-readable quota description for a rank
+    static getQuotaDescription(rankLevel) {
+        const quota = this.getQuotaForRank(rankLevel);
+        const rank = RankSystem.getRankByLevel(rankLevel);
+        
+        if (quota === 0) {
+            return `${RankSystem.formatRank({ rankLevel, rankName: rank.name })} - No quota required (Executive+)`;
+        }
+        
+        return `${RankSystem.formatRank({ rankLevel, rankName: rank.name })} - ${quota} points required`;
+    }
+
+    // Check if a user needs quota recalculation (after rank change)
+    static needsQuotaRecalculation(user) {
+        const expectedQuota = this.getUserQuota(user);
+        return user.biweeklyQuota !== expectedQuota;
+    }
+
+    // Get all users who need quota updates
+    static async getUsersNeedingQuotaUpdate() {
+        try {
+            const MRBUser = require('../models/MRBUser');
+            
+            const users = await MRBUser.find({});
+            const needingUpdate = [];
+            
+            for (const user of users) {
+                if (this.needsQuotaRecalculation(user)) {
+                    const expectedQuota = this.getUserQuota(user);
+                    needingUpdate.push({
+                        username: user.username,
+                        currentQuota: user.biweeklyQuota,
+                        expectedQuota,
+                        rankLevel: user.rankLevel
+                    });
+                }
+            }
+            
+            return needingUpdate;
+            
+        } catch (error) {
+            console.error('❌ Error checking users needing quota update:', error);
+            return [];
+        }
+    }
+
+    // Apply quota update for biweekly reset with rank-based quotas
+    static async applyBiWeeklyQuotaReset() {
+        try {
+            const MRBUser = require('../models/MRBUser');
+            
+            console.log('🔄 Applying biweekly quota reset with UPDATED rank-based quotas...');
+            
+            // Update all users with current rank-based quotas
+            const users = await MRBUser.find({});
+            let updatedCount = 0;
+            
+            for (const user of users) {
+                const newQuota = this.getUserQuota(user); // Uses NEW quota requirements
+                
+                // Update quota and reset biweekly stats
+                user.biweeklyQuota = newQuota;
+                user.biweeklyPoints = 0;
+                user.biweeklyEvents = 0;
+                user.quotaCompleted = false;
+                user.dailyPointsToday = 0;
+                user.lastDailyReset = new Date();
+                user.previousBiWeeklyPoints = 0;
+                
+                await user.save();
+                updatedCount++;
+            }
+            
+            console.log(`✅ biweekly quota reset complete: ${updatedCount} users updated with NEW rank-based quotas`);
+            console.log(`📊 NEW Quota structure: Probationary=10, Junior-Senior=12, Specialized-Elite=15, Elite I-IV=18, Executive+=0`);
+            
+            return {
+                success: true,
+                usersUpdated: updatedCount
+            };
+            
+        } catch (error) {
+            console.error('❌ biweekly quota reset error:', error);
+            return {
+                success: false,
+                error: error.message
+            };
+        }
+    }
+}
+
+module.exports = QuotaSystem;

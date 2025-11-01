@@ -1,0 +1,69 @@
+# MRB Bot - Git Ignore File
+
+# Environment variables (CRITICAL - Never commit these!)
+.env
+.env.local
+.env.*.local
+
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+
+# Test files
+test/
+*.test.js
+
+# Build files
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+
+# Debug files
+.cache/
+
+# PM2 files
+ecosystem.config.js
+.pm2/
+
+# Backup files
+*.backup
+*.bak
+backup/
+
+# Database dumps
+*.sql
+*.dump
+
+# Coverage directory
+coverage/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
