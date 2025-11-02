@@ -2,32 +2,32 @@
 const RankSystem = require('./rankSystem');
 
 class QuotaSystem {
-    // UPDATED: New rank-based quota structure with reduced requirements
+    // UPDATED: Doubled quota requirements for all ranks
     static quotaByRankLevel = {
-        // Probationary (unchanged)
-        1: 10,   // Probationary Operator: 10 points
+        // Enlisted Personnel
+        1: 20,   // Private: 20 points (doubled from 10)
         
-        // Junior-Senior ranks (reduced from 20 to 12)
-        2: 12,   // Junior Operator: 12 points (was 20)
-        3: 12,   // Experienced Operator: 12 points (was 20)
-        4: 12,   // Senior Operator: 12 points (was 20)
+        // Enlisted ranks
+        2: 24,   // Private First Class: 24 points (doubled from 12)
+        3: 24,   // Lance Corporal: 24 points (doubled from 12)
+        4: 24,   // Corporal: 24 points (doubled from 12)
         
-        // Specialized-Elite ranks (reduced from 25 to 15)
-        5: 15,   // Specialized Operator: 15 points (was 25)
-        6: 15,   // Elite Operator: 15 points (was 25)
+        // NCO ranks
+        5: 30,   // Sergeant: 30 points (doubled from 15)
+        6: 30,   // Staff Sergeant: 30 points (doubled from 15)
         
-        // Elite I-IV ranks (reduced from 30 to 18)
-        7: 18,   // Elite Operator I Class: 18 points (was 30)
-        8: 18,   // Elite Operator II Class: 18 points (was 30)
-        9: 18,   // Elite Operator III Class: 18 points (was 30)
-        10: 18,  // Elite Operator IV Class: 18 points (was 30)
+        // Elite NCO ranks
+        7: 36,   // Gunnery Sergeant: 36 points (doubled from 18)
+        8: 36,   // Warrant Officer: 36 points (doubled from 18)
+        9: 36,   // Second Lieutenant: 36 points (doubled from 18)
+        10: 36,  // First Lieutenant: 36 points (doubled from 18)
         
         // Executive+ ranks (no quota - unchanged)
-        11: 0,   // Commanding Officer: No quota
-        12: 0,   // Senior Commanding Officer: No quota
-        13: 0,   // Operations Chief: No quota
-        14: 0,   // Deputy Commander: No quota
-        15: 0    // MRB Commander: No quota
+        11: 0,   // Lieutenant Colonel: No quota
+        12: 0,   // Commanding Captain: No quota
+        13: 0,   // Brigadier General: No quota
+        14: 0,   // Major General: No quota
+        15: 0    // Chief of the Army: No quota
     };
 
     // Get quota for a specific rank level
@@ -242,8 +242,8 @@ class QuotaSystem {
                 updatedCount++;
             }
             
-            console.log(`✅ biweekly quota reset complete: ${updatedCount} users updated with NEW rank-based quotas`);
-            console.log(`📊 NEW Quota structure: Probationary=10, Junior-Senior=12, Specialized-Elite=15, Elite I-IV=18, Executive+=0`);
+            console.log(`✅ biweekly quota reset complete: ${updatedCount} users updated with DOUBLED rank-based quotas`);
+            console.log(`📊 DOUBLED Quota structure: Enlisted=20-24, NCO=30, Elite NCO/Officer=36, Executive+=0`);
             
             return {
                 success: true,

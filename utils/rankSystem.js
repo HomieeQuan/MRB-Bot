@@ -7,35 +7,35 @@ class RankSystem {
             level: 1, 
             name: 'Private', 
             pointsRequired: 0, 
-            rankLockDays: 3,  // Updated: 3 days
+            rankLockDays: 3,
             emoji: ''
         },
         { 
             level: 2, 
             name: 'Private First Class', 
-            pointsRequired: 35,  // UPDATED: was 25 (Option 1)
-            rankLockDays: 3,  // Updated: 3 days
+            pointsRequired: 46,  // UPDATED: 35 * 1.3 = 45.5 → 46
+            rankLockDays: 3,
             emoji: ''
         },
         { 
             level: 3, 
             name: 'Lance Corporal', 
-            pointsRequired: 45,  // UPDATED: was 30 (Option 1)
-            rankLockDays: 5,  // Updated: 5 days
+            pointsRequired: 59,  // UPDATED: 45 * 1.3 = 58.5 → 59
+            rankLockDays: 5,
             emoji: ''
         },
         { 
             level: 4, 
             name: 'Corporal', 
-            pointsRequired: 55,  // UPDATED: was 40 (Option 1)
-            rankLockDays: 5,  // Updated: 5 days
+            pointsRequired: 72,  // UPDATED: 55 * 1.3 = 71.5 → 72
+            rankLockDays: 5,
             emoji: ''
         },
         { 
             level: 5, 
             name: 'Sergeant', 
-            pointsRequired: 70,  // UPDATED: was 50 (Option 1)
-            rankLockDays: 8,  // Updated: 8 days
+            pointsRequired: 91,  // UPDATED: 70 * 1.3 = 91
+            rankLockDays: 8,
             emoji: ''
         },
         
@@ -43,22 +43,22 @@ class RankSystem {
         { 
             level: 6, 
             name: 'Staff Sergeant', 
-            pointsRequired: 90,  // UPDATED: was 60 (Option 1)
-            rankLockDays: 8,  // Updated: 8 days
+            pointsRequired: 117,  // UPDATED: 90 * 1.3 = 117
+            rankLockDays: 8,
             emoji: '⚡'
         },
         { 
             level: 7, 
             name: 'Gunnery Sergeant', 
-            pointsRequired: 120,  // UPDATED: was 80 (Option 1)
-            rankLockDays: 8,  // Updated: 8 days
+            pointsRequired: 156,  // UPDATED: 120 * 1.3 = 156
+            rankLockDays: 8,
             emoji: '⚡⚡'
         },
         { 
             level: 8, 
             name: 'Warrant Officer', 
-            pointsRequired: 140,  // UPDATED: was 90 (Option 1)
-            rankLockDays: 8,  // Updated: 8 days
+            pointsRequired: 182,  // UPDATED: 140 * 1.3 = 182
+            rankLockDays: 8,
             emoji: '⚡⚡⚡'
         },
         
