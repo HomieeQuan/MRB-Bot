@@ -73,6 +73,7 @@ module.exports = {
                             { name: 'Commanding Captain', value: 'Commanding Captain' },
                             { name: 'Brigadier General', value: 'Brigadier General' },
                             { name: 'Major General', value: 'Major General' },
+                            { name: 'General', value: 'General' },
                             { name: 'Chief of the Army', value: 'Chief of the Army' }
                         ))
                 .addStringOption(option =>
@@ -118,6 +119,7 @@ module.exports = {
                             { name: 'Commanding Captain', value: 'Commanding Captain' },
                             { name: 'Brigadier General', value: 'Brigadier General' },
                             { name: 'Major General', value: 'Major General' },
+                            { name: 'General', value: 'General' },
                             { name: 'Chief of the Army', value: 'Chief of the Army' }
                         ))
                 .addIntegerOption(option =>
