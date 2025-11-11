@@ -769,6 +769,23 @@ module.exports = {
                 return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
 
+            // 🛡️ PHASE 2: Officer rank restriction (Level 9+)
+            // Only GENERALS can promote to officer ranks (Second Lieutenant and above)
+            if (targetRank.level >= 9 && !PermissionChecker.isGenerals(interaction.member)) {
+                const errorEmbed = new EmbedBuilder()
+                    .setColor('#ff0000')
+                    .setTitle('🚫 Officer Promotion Restricted')
+                    .setDescription('Only **MRB | GENERALS** can promote users to officer ranks (Second Lieutenant and above).')
+                    .addFields(
+                        { name: '🎖️ Target Rank', value: `${targetRank.name} (Level ${targetRank.level})`, inline: true },
+                        { name: '🔒 Required Permission', value: 'MRB | GENERALS', inline: true },
+                        { name: '📋 Your Permission', value: 'MRB | COMMANDING OFFICER', inline: true }
+                    )
+                    .setFooter({ text: 'Officer promotions require top-tier authorization' })
+                    .setTimestamp();
+                return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            }
+
             // Apply force promotion with proper rank lock
             const oldRank = currentRank;
             user.rankName = targetRank.name;

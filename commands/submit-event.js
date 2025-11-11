@@ -19,7 +19,8 @@ module.exports = {
                     { name: 'Warrant Execution (10pts)', value: 'warrant_execution' },
                     { name: 'MRB Inspection (3pts)', value: 'mrb_inspection' },
                     { name: 'MRB Tryout - Public (4pts)', value: 'mrb_tryout_public' },
-                    { name: 'MRB Tryout - Private (3pts)', value: 'mrb_tryout_private' }
+                    { name: 'MRB Tryout - Private (3pts)', value: 'mrb_tryout_private' },
+                    { name: 'War Event (20pts)', value: 'war' }
                 ))
         .addStringOption(option =>
             option.setName('description')

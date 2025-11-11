@@ -19,15 +19,18 @@ class QuotaSystem {
         // Elite NCO ranks
         7: 36,   // Gunnery Sergeant: 36 points (doubled from 18)
         8: 36,   // Warrant Officer: 36 points (doubled from 18)
-        9: 36,   // Second Lieutenant: 36 points (doubled from 18)
-        10: 36,  // First Lieutenant: 36 points (doubled from 18)
+        
+        // Officer ranks (hand-picked - no quota)
+        9: 0,    // Second Lieutenant: No quota (hand-picked)
+        10: 0,   // First Lieutenant: No quota (hand-picked)
         
         // Executive+ ranks (no quota - unchanged)
         11: 0,   // Lieutenant Colonel: No quota
         12: 0,   // Commanding Captain: No quota
         13: 0,   // Brigadier General: No quota
         14: 0,   // Major General: No quota
-        15: 0    // Chief of the Army: No quota
+        15: 0,   // General: No quota
+        16: 0    // Chief of the Army: No quota
     };
 
     // Get quota for a specific rank level

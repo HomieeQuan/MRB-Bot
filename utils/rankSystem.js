@@ -94,7 +94,7 @@ class RankSystem {
             emoji: '🎖️'
         },
         
-        // Command Generals (Levels 13-15)
+        // Command Generals (Levels 13-16)
         { 
             level: 13, 
             name: 'Brigadier General', 
@@ -111,6 +111,13 @@ class RankSystem {
         },
         { 
             level: 15, 
+            name: 'General', 
+            pointsRequired: 0,  // No points needed - promotion by merit only
+            rankLockDays: 0,
+            emoji: '👑⭐'
+        },
+        { 
+            level: 16, 
             name: 'Chief of the Army', 
             pointsRequired: 0,  // No points needed - highest rank
             rankLockDays: 0,
@@ -131,7 +138,7 @@ class RankSystem {
     // Get next rank for a user
     static getNextRank(currentLevel) {
         const nextLevel = currentLevel + 1;
-        if (nextLevel > 15) return null; // Already at max rank
+        if (nextLevel > 16) return null; // Already at max rank
         return this.getRankByLevel(nextLevel);
     }
 

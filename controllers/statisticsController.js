@@ -6,8 +6,8 @@ class StatisticsController {
     // Calculate enhanced statistics for leaderboard
     static async getEnhancedStatistics() {
         try {
-            // Get all users
-            const allUsers = await MRBUser.find({});
+            // Get all ACTIVE users only (exclude deleted/inactive)
+            const allUsers = await MRBUser.find({ active: { $ne: false } });
             
             if (allUsers.length === 0) {
                 return {
@@ -62,9 +62,10 @@ class StatisticsController {
             const user = await MRBUser.findOne({ discordId: userId });
             if (!user) return { direction: '', change: 0 };
 
-            // Calculate rank change
+            // Calculate rank change (only among ACTIVE users)
             const currentRank = await MRBUser.countDocuments({ 
-                biweeklyPoints: { $gt: user.biweeklyPoints } 
+                biweeklyPoints: { $gt: user.biweeklyPoints },
+                active: { $ne: false }
             }) + 1;
 
             const rankChange = user.previousRank - currentRank; // Positive = rank improved
@@ -92,9 +93,12 @@ class StatisticsController {
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-            // Reset daily points for users who haven't been reset today
+            // Reset daily points for ACTIVE users who haven't been reset today
             await MRBUser.updateMany(
-                { lastDailyReset: { $lt: startOfDay } },
+                { 
+                    lastDailyReset: { $lt: startOfDay },
+                    active: { $ne: false }
+                },
                 { 
                     $set: { 
                         dailyPointsToday: 0,

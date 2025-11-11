@@ -76,9 +76,19 @@ module.exports = {
         .setDMPermission(false),
 
     async execute(interaction) {
-        // Check HR permission
-        if (!PermissionChecker.canManageSystem(interaction.member)) {
-            const errorEmbed = MRBEmbeds.createErrorEmbed('🚫 Only HR can use user management commands!');
+        // 🛡️ PHASE 2: Restrict to Period (.) role only
+        // Only super admins can delete/restore/manage users
+        if (!PermissionChecker.isSuperAdmin(interaction.member)) {
+            const errorEmbed = new EmbedBuilder()
+                .setColor('#ff0000')
+                .setTitle('🚫 Super Admin Access Required')
+                .setDescription('User management commands are restricted to **Period (.) role** only.')
+                .addFields(
+                    { name: '🔒 Required Permission', value: 'Period (.) Role', inline: true },
+                    { name: '⚠️ Reason', value: 'These commands can permanently affect user data', inline: false }
+                )
+                .setFooter({ text: 'Contact a super admin if you need assistance' })
+                .setTimestamp();
             return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
         }
 

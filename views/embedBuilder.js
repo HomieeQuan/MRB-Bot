@@ -36,8 +36,16 @@ class MRBEmbeds {
                 });
             }
 
-            // FIXED: Add rank progression bar for non-Executive ranks (MOVED TO CORRECT POSITION)
-            if (!RankSystem.isExecutiveOrHigher(user.rankLevel)) {
+            // 🛡️ PHASE 2: Hide rank progression for officers (Second Lieutenant+ = Level 9+)
+            if (user.rankLevel >= 9) {
+                // Officers don't have progression bars
+                embed.addFields({
+                    name: '🎖️ Officer Rank',
+                    value: '✨ **Hand-picked Officer Rank**\nOfficers are promoted by merit and leadership decision.',
+                    inline: false
+                });
+            } else {
+                // FIXED: Add rank progression bar for non-Officer ranks (MOVED TO CORRECT POSITION)
                 // Ensure user has all required fields with safe fallbacks
                 const safeUser = {
                     rankPoints: user.rankPoints || 0,
@@ -65,11 +73,11 @@ class MRBEmbeds {
                 }
             }
 
-            // Weekly quota progress (this comes AFTER rank progression)
-            if (RankSystem.isExecutiveOrHigher(user.rankLevel)) {
+            // 🛡️ PHASE 2: Weekly quota progress (officers have no quota)
+            if (user.rankLevel >= 9) {
                 embed.addFields({
                     name: '🎯 BiWeekly Quota',
-                    value: 'No quota required',
+                    value: '✨ **No quota required for officers**',
                     inline: false
                 });
             } else {

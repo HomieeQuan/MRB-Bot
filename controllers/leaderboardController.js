@@ -9,8 +9,8 @@ class LeaderboardController {
         try {
             console.log('🔍 Starting enhanced biweekly leaderboard...');
             
-            // Get all users sorted by biweekly points
-            const users = await MRBUser.find({})
+            // Get all ACTIVE users sorted by biweekly points (exclude deleted/inactive)
+            const users = await MRBUser.find({ active: { $ne: false } })
                 .sort({ biweeklyPoints: -1 })
                 .limit(50);
 
@@ -49,8 +49,8 @@ class LeaderboardController {
         try {
             console.log('🔍 Starting enhanced all-time leaderboard...');
             
-            // Get all users sorted by all-time points
-            const users = await MRBUser.find({})
+            // Get all ACTIVE users sorted by all-time points (exclude deleted/inactive)
+            const users = await MRBUser.find({ active: { $ne: false } })
                 .sort({ allTimePoints: -1 })
                 .limit(50);
 
@@ -84,13 +84,15 @@ class LeaderboardController {
                 return await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
             }
 
-            // Calculate positions
+            // Calculate positions (only among ACTIVE users)
             const biweeklyRank = await MRBUser.countDocuments({ 
-                biweeklyPoints: { $gt: user.biweeklyPoints } 
+                biweeklyPoints: { $gt: user.biweeklyPoints },
+                active: { $ne: false }
             }) + 1;
 
             const allTimeRank = await MRBUser.countDocuments({ 
-                allTimePoints: { $gt: user.allTimePoints } 
+                allTimePoints: { $gt: user.allTimePoints },
+                active: { $ne: false }
             }) + 1;
 
             // Get trend information

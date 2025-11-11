@@ -1,9 +1,10 @@
 // utils/permissionChecker.js - MRB permission system
 const ROLES = {
-    // ADMIN LEVEL (Generals)
-    ADMIN: '.', // Period role - full access
+    // ADMIN LEVEL (Generals) - TOP TIER
+    GENERALS: 'MRB | GENERALS',
+    ADMIN: '.', // Period role - legacy admin access
     
-    // HR LEVEL (Commanding Officers)
+    // HR LEVEL (Commanding Officers) - LIMITED ADMIN
     COMMANDING_OFFICER: 'MRB | COMMANDING OFFICER',
     
     // OPERATOR LEVEL (All MRB Members)
@@ -12,10 +13,11 @@ const ROLES = {
 
 // Role hierarchy levels (higher number = more permissions)
 const ROLE_LEVELS = {
-    // ADMIN LEVEL
-    [ROLES.ADMIN]: 100,
+    // ADMIN LEVEL (GENERALS - Full Access)
+    [ROLES.GENERALS]: 100,
+    [ROLES.ADMIN]: 100, // Period role same level as GENERALS
     
-    // HR LEVEL
+    // HR LEVEL (Commanding Officers - Limited Admin)
     [ROLES.COMMANDING_OFFICER]: 50,
     
     // OPERATOR LEVEL
@@ -66,14 +68,24 @@ class PermissionChecker {
 
     // ===== PERMISSION LEVEL CHECKS =====
 
-    // Check if user is Admin (General)
+    // Check if user is GENERALS (top-tier admin - full access)
+    static isGenerals(member) {
+        return this.hasRole(member, ROLES.GENERALS) || this.hasRole(member, ROLES.ADMIN);
+    }
+
+    // Check if user is Admin (GENERALS level - for backward compatibility)
     static isAdmin(member) {
-        return this.getUserRoleLevel(member) >= 100;
+        return this.isGenerals(member);
     }
 
     // Check if user is HR+ (Commanding Officer+)
     static isHRPlus(member) {
         return this.getUserRoleLevel(member) >= 50;
+    }
+    
+    // Check if user is Commanding Officer (not GENERALS)
+    static isCommandingOfficer(member) {
+        return this.hasRole(member, ROLES.COMMANDING_OFFICER) && !this.isGenerals(member);
     }
 
     // Check if user is MRB Member
@@ -96,7 +108,7 @@ class PermissionChecker {
         return this.isMRBMember(member);
     }
 
-    // HR+ PERMISSIONS (Commanding Officers)
+    // HR+ PERMISSIONS (Commanding Officers+ - with limits)
     static canManagePoints(member) {
         return this.isHRPlus(member);
     }
@@ -109,33 +121,65 @@ class PermissionChecker {
         return this.isHRPlus(member);
     }
 
-    static canResetCycle(member) {
-        return this.isHRPlus(member);
-    }
-
-    static canManageUsers(member) {
-        return this.isHRPlus(member);
-    }
-
-    static canManagePromotions(member) {
-        return this.isHRPlus(member);
-    }
-
-    static canForcePromotions(member) {
-        return this.isHRPlus(member);
-    }
-
     static canViewOtherStats(member) {
         return this.isHRPlus(member);
     }
+    
+    // Commanding Officers can promote up to Warrant Officer (Level 8)
+    static canPromoteToRank(member, targetRankLevel) {
+        if (this.isGenerals(member)) {
+            return true; // GENERALS can promote to any rank
+        }
+        if (this.isCommandingOfficer(member)) {
+            return targetRankLevel <= 8; // COs can only promote up to Warrant Officer
+        }
+        return false;
+    }
 
-    // ADMIN PERMISSIONS (Generals only)
+    // GENERALS-ONLY PERMISSIONS (Full admin access)
+    static canDeleteUsers(member) {
+        return this.isGenerals(member); // Only GENERALS can delete
+    }
+    
+    static canPromoteOfficers(member) {
+        return this.isGenerals(member); // Only GENERALS can promote to officer ranks (9+)
+    }
+    
+    static canOverrideLimits(member) {
+        return this.isGenerals(member); // Only GENERALS can bypass safeguards
+    }
+    
+    static canViewAllAudits(member) {
+        return this.isGenerals(member); // Only GENERALS see all audit logs
+    }
+    
+    static canUndoActions(member) {
+        return this.isGenerals(member); // Only GENERALS can undo HR actions
+    }
+
+    static canResetCycle(member) {
+        return this.isGenerals(member); // Only GENERALS can reset cycles
+    }
+
+    static canManageUsers(member) {
+        return this.isGenerals(member); // Only GENERALS can manage users (delete, etc)
+    }
+
+    static canManagePromotions(member) {
+        return this.isHRPlus(member); // Both can promote (but COs have limits)
+    }
+
+    static canForcePromotions(member) {
+        return this.isGenerals(member); // Only GENERALS can force promote
+    }
+
+    // ADMIN PERMISSIONS (GENERALS only)
     static canUseAdminCommands(member) {
-        return this.isAdmin(member);
+        return this.isGenerals(member);
     }
 
     static canManageAutomation(member) {
-        return this.isAdmin(member);
+        return this.isGenerals(member);
     }
 
     // ===== LEGACY COMPATIBILITY =====
@@ -152,8 +196,10 @@ class PermissionChecker {
 
     static getPermissionErrorMessage(requiredLevel) {
         switch (requiredLevel) {
+            case 'generals':
+                return '🚫 Only **MRB | GENERALS** can use this command!';
             case 'admin':
-                return '🚫 Only **Generals** (.) can use this command!';
+                return '🚫 Only **Generals** (MRB | GENERALS or .) can use this command!';
             case 'hr':
                 return '🚫 Only **Commanding Officers** or higher can use this command!';
             case 'member':
@@ -172,7 +218,9 @@ class PermissionChecker {
                 roleLevel: 0,
                 highestRole: 'No Role',
                 permissions: {
+                    isGenerals: false,
                     isAdmin: false,
+                    isCommandingOfficer: false,
                     isHRPlus: false,
                     isMRBMember: false
                 }
@@ -187,7 +235,9 @@ class PermissionChecker {
             roleLevel,
             highestRole,
             permissions: {
+                isGenerals: this.isGenerals(member),
                 isAdmin: this.isAdmin(member),
+                isCommandingOfficer: this.isCommandingOfficer(member),
                 isHRPlus: this.isHRPlus(member),
                 isMRBMember: this.isMRBMember(member)
             }
@@ -196,15 +246,15 @@ class PermissionChecker {
 
     static getRoleHierarchy() {
         return {
-            'ADMIN LEVEL (Generals)': {
-                roles: [ROLES.ADMIN],
+            'GENERALS LEVEL (Full Admin)': {
+                roles: [ROLES.GENERALS, ROLES.ADMIN],
                 level: 100,
-                access: 'ALL commands including admin tools and automation'
+                access: 'ALL commands - delete users, promote officers, manage automation, override limits'
             },
-            'HR LEVEL (Commanding Officers)': {
+            'COMMANDING OFFICER LEVEL (Limited Admin)': {
                 roles: [ROLES.COMMANDING_OFFICER],
                 level: 50,
-                access: 'HR functions, point management, user management, promotions'
+                access: 'Manage points (with limits), promote up to Warrant Officer, view audits (own actions)'
             },
             'OPERATOR LEVEL (MRB Members)': {
                 roles: [ROLES.MRB_MEMBER],

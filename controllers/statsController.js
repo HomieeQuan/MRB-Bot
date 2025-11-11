@@ -46,14 +46,16 @@ class StatsController {
                 console.log(`✅ Fixed missing fields for user ${user.username}`);
             }
     
-            // Calculate biweekly rank
+            // Calculate biweekly rank (only among ACTIVE users)
             const biweeklyRank = await MRBUser.countDocuments({ 
-                biweeklyPoints: { $gt: user.biweeklyPoints || 0 } 
+                biweeklyPoints: { $gt: user.biweeklyPoints || 0 },
+                active: { $ne: false }
             }) + 1;
     
-            // Calculate all-time rank  
+            // Calculate all-time rank (only among ACTIVE users)
             const allTimeRank = await MRBUser.countDocuments({ 
-                allTimePoints: { $gt: user.allTimePoints || 0 } 
+                allTimePoints: { $gt: user.allTimePoints || 0 },
+                active: { $ne: false }
             }) + 1;
     
             // 🔧 ISSUE #4 FIX: Filter out HR audit actions from user-visible recent events
@@ -142,13 +144,15 @@ class StatsController {
                 console.log(`✅ Fixed missing fields for user ${user.username} (HR view)`);
             }
     
-            // Calculate ranks
+            // Calculate ranks (only among ACTIVE users)
             const biweeklyRank = await MRBUser.countDocuments({ 
-                biweeklyPoints: { $gt: user.biweeklyPoints || 0 } 
+                biweeklyPoints: { $gt: user.biweeklyPoints || 0 },
+                active: { $ne: false }
             }) + 1;
     
             const allTimeRank = await MRBUser.countDocuments({ 
-                allTimePoints: { $gt: user.allTimePoints || 0 } 
+                allTimePoints: { $gt: user.allTimePoints || 0 },
+                active: { $ne: false }
             }) + 1;
     
             // 🔧 ISSUE #4 FIX: For HR viewing others, show user events but still filter out HR audit actions

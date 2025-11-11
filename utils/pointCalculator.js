@@ -10,7 +10,8 @@ class PointCalculator {
         'warrant_execution': 10,
         'mrb_inspection': 3,
         'mrb_tryout_public': 4,
-        'mrb_tryout_private': 3
+        'mrb_tryout_private': 3,
+        'war': 20                      // NEW: War event
     };
 
     // Human-readable names for each event type
@@ -23,7 +24,8 @@ class PointCalculator {
         'warrant_execution': 'Warrant Execution',
         'mrb_inspection': 'MRB Inspection',
         'mrb_tryout_public': 'MRB Tryout (Public)',
-        'mrb_tryout_private': 'MRB Tryout (Private)'
+        'mrb_tryout_private': 'MRB Tryout (Private)',
+        'war': 'War Event'             // NEW: War event name
     };
 
     // Calculate base points for an event (without streak bonus)
